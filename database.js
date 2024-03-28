@@ -1,3 +1,4 @@
+//Creates a connection to the Mysql Database, all information will be stored in a .ejs file to avoid hardcoding information into the system
 const mysql = require('mysql2')
 require('dotenv').config();
 const connection = mysql.createConnection({
@@ -7,6 +8,7 @@ const connection = mysql.createConnection({
     password: process.env.MYSQL_PASSWORD,
     database: process.env.MYSQL_DATABASE
 })
+//Function shows all the devices, by taking out the data from the mysql database, and putting it in readable form on localhost:8080
 function allDevices() {
     let select_all_devices = `SELECT location_school.university_name,
                device.model_number,
@@ -26,7 +28,7 @@ function allDevices() {
                  JOIN sensors ON device.hardware_id = sensors.id
                  JOIN location_school ON device.location_id = location_school.id;`
     return new Promise(function (resolve, reject) {
-        connection.query(select_all_devices, function (err, result,) {
+        connection.execute(select_all_devices, function (err, result,) {
             if (err) {
                 reject(err)
             } else {
@@ -50,9 +52,11 @@ function allDevices() {
             }
         })
     })
+
 }
 
-
+//need to add a begin transaction and a rollback so that when a duplicate or invalid data gets inserted to the database
+// it rejects it and rolls back keeping the relationship intact.
 async function addDevice(location_school, electrocardiogram, inertial_measurement_unit, optical_pulse_oximeter, microphone, temperature_sensor, electronic_nose, galvanic_skin_response, micro_controller_number, real_time_clock_model_number, info_about_data_storage, firmware_version, date_installed, model_number, device_status, date_deployed) {
     let device_fkey = []
     let queries = [{
@@ -87,7 +91,6 @@ async function addDevice(location_school, electrocardiogram, inertial_measuremen
             })
         })
     }))
-
     let deviceQ = 'INSERT INTO device (model_number, device_status, date_deployed, Hardware_id, sensor_id, firmware_id,location_id) values (?,?,?,?,?,?,?)'
     let deviceV = [model_number, device_status, date_deployed, ...device_fkey]
     connection.query(deviceQ, deviceV, function (err, result) {
@@ -98,5 +101,5 @@ async function addDevice(location_school, electrocardiogram, inertial_measuremen
         }
     })
 }
-
+//Exports the modules so that they may be used elsewhere
 module.exports = {addDevice, allDevices}

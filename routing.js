@@ -4,33 +4,18 @@ const bodyParser = require('body-parser')
 const db = require('./database')
 const util = require('./utilities')
 const {check_if_empty} = require("./utilities");
-
+//Sets render to look for .ejs files
 app.set('view engine', 'ejs')
+//enables data to be pulled from a html forum
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: false}))
+
+//renders home page
 app.get('/', function (req, res) {
     res.render('index')
 })
 
-
-// app.get('/showPeople', async function (req, res) {
-//     try {
-//         const result = await db.allPeople();
-//         const formattedData = result.map(person => {
-//             return {
-//                 first: person.first,
-//                 last: person.last
-//             }
-//         })
-//         res.render('showPeople', {data: formattedData});
-//     } catch (err) {
-//         console.error(err);
-//         // Handle the error appropriately, maybe render error page
-//         res.status(500).send('Internal Server Error');
-//     }
-// });
-
-// Select all Devices From Database
+//Renders and showes all listed devices within the database
 app.get('/showDevices', async function (req, res) {
     console.log('Someone clicked a button')
     try {
@@ -62,10 +47,13 @@ app.get('/showDevices', async function (req, res) {
     }
 });
 // Adding Device page
+//Renders forum to add devices to the database
 app.get('/addDevice', function (req, res) {
     console.log('WORKING')
     res.render('add_devices')
 })
+
+//sends data to function that inserts data to database
 app.post('/addDevice', async function (req, res) {
     const body = req.body
     await db.addDevice(body.location_school, body.electrocardiogram, body.inertial_measurement_unit, body.optical_pulse_oximeter, body.microphone, body.temperature_sensor, body.electronic_nose, body.galvanic_skin_response, body.micro_controller_number, body.real_time_clock_model_number, body.info_about_data_storage, body.firmware_version, body.date_installed, body.model_number, body.device_status, body.date_deployed)
